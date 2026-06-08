@@ -129,19 +129,14 @@ async def generate_from_link(request: PostRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# C. Procesare AUDIO (Actualizat 100% pentru noul SDK google-genai)
+# C. Procesare AUDIO (Evităm File API, trimitem datele direct INLINE)
 @app.post("/api/generate-from-audio")
 async def generate_from_audio(audio_file: UploadFile = File(...)):
-    file_path = f"temp_{audio_file.filename}"
     try:
-        # 1. Salvăm fișierul temporar pe disc
-        with open(file_path, "wb") as f:
-            f.write(await audio_file.read())
+        # 1. Citim fișierul audio direct în memoria RAM sub formă de bytes (fără să-l salvăm pe disc)
+        audio_bytes = await audio_file.read()
 
-        # 2. Încărcăm fișierul folosind noul SDK (clientul principal)
-        uploaded_file = client.files.upload(file=file_path)
-
-        # 3. Prompt-ul magic
+        # 2. Prompt-ul magic
         prompt = """
         Ascultă această înregistrare audio. Extrage ideea principală și generează 3 postări de social media.
         Returnează rezultatul strict în format JSON cu cheile: "linkedin", "twitter", "facebook".
@@ -151,10 +146,16 @@ async def generate_from_audio(audio_file: UploadFile = File(...)):
         Reguli pentru Facebook: Prietenos, folosește emoji-uri, termină cu o întrebare.
         """
 
-        # 4. Generăm conținutul asincron (trimitem și textul și referința fișierului audio)
+        # 3. Generăm conținutul asincron (folosim Part.from_bytes pentru a injecta audio-ul direct)
         response = await client.aio.models.generate_content(
             model="gemini-2.5-flash",
-            contents=[prompt, uploaded_file]
+            contents=[
+                prompt,
+                types.Part.from_bytes(
+                    data=audio_bytes,
+                    mime_type=audio_file.content_type or "audio/webm"
+                )
+            ]
         )
 
         try:
@@ -173,11 +174,8 @@ async def generate_from_audio(audio_file: UploadFile = File(...)):
             return {"status": "error", "message": f"Nu s-a putut parsa răspunsul AI: {response.text}"}
 
     except Exception as e:
+        print(f"EROARE DETALIATĂ AUDIO: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        # Ștergem fișierul de pe server, indiferent dacă procesul a reușit sau nu
-        if os.path.exists(file_path):
-            os.remove(file_path)
 
 
 # Funcția centrală care coordonează textele (folosită de Text și Link)
