@@ -4,221 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Social Cross-Poster Pro</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #ff6a00; }
-
-        /* Stilizare Tab-uri */
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; border: 1px solid #ff6a00; background: white; color: #ff6a00; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .tab-btn.active { background: #ff6a00; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        textarea, input[type="text"] { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        textarea { height: 120px; resize: vertical; }
-
-        .action-btn { display: block; width: 100%; background-color: #ff6a00; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; transition: background 0.3s; }
-        .action-btn:hover { background-color: #e65c00; }
-        .action-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-
-        #recordBtn { background-color: #dc3545; }
-        #recordBtn.recording { background-color: #28a745; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .result-card { background: #fafafa; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-        .result-card h3 { margin-top: 0; color: #555; border-bottom: 2px solid #ff6a00; padding-bottom: 10px; }
-        .result-text { white-space: pre-wrap; font-size: 15px; line-height: 1.5; }
-        .loader { text-align: center; margin-top: 10px; font-weight: bold; color: #ff6a00; display: none; }
-    </style>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="bg-dark-custom text-light d-flex flex-column min-vh-100">
 
-<div class="container">
-    <h1>🚀 AI Social Cross-Poster</h1>
-    <p style="text-align: center; color: #777; margin-top: -10px; margin-bottom: 30px;">Alege metoda preferată pentru a genera conținut</p>
+    <div class="container py-5 flex-grow-1">
+        
+        <div class="text-center mb-5 fade-in">
+            <h1 class="fw-bold mb-3 section-hero-title">AI Social Cross-Poster</h1>
+            <p class="text-secondary mx-auto" style="max-width: 600px;">
+                Transformă-ți ideile în postări perfecte pentru LinkedIn, Twitter și Facebook într-un mod simplu și rapid.
+            </p>
+        </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-text')">📝 Scrie Ideea</button>
-        <button class="tab-btn" onclick="switchTab('tab-link')">🔗 Din Articol</button>
-        <button class="tab-btn" onclick="switchTab('tab-audio')">🎙️ Vorbește</button>
+        <div class="row justify-content-center fade-in delay-1">
+            <div class="col-lg-8">
+                <div class="card app-card border-0 shadow-lg">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <div class="d-flex justify-content-center gap-2 gap-sm-4 mb-4 pb-2 border-bottom border-secondary border-opacity-25">
+                            <button class="tab-btn active" onclick="switchTab('tab-text', this)"><i class="bi bi-textarea-t me-2"></i>Text</button>
+                            <button class="tab-btn" onclick="switchTab('tab-link', this)"><i class="bi bi-link-45deg me-2"></i>Link</button>
+                            <button class="tab-btn" onclick="switchTab('tab-audio', this)"><i class="bi bi-mic-fill me-2"></i>Audio</button>
+                        </div>
+
+                        <div id="tab-text" class="tab-content active-tab">
+                            <div class="mb-4">
+                                <label for="masterPost" class="form-label text-secondary fw-medium mb-2">Ideea ta principală</label>
+                                <textarea id="masterPost" class="form-control custom-input" placeholder="Ex: Tocmai am lansat o nouă aplicație..." rows="5"></textarea>
+                            </div>
+                            <button class="btn btn-primary w-100 py-3 fw-bold rounded-3 action-btn" id="genTextBtn" onclick="generatePosts('/api/generate-posts', 'masterPost')">
+                                Generează postările
+                            </button>
+                        </div>
+
+                        <div id="tab-link" class="tab-content" style="display: none;">
+                            <div class="mb-4">
+                                <label for="linkInput" class="form-label text-secondary fw-medium mb-2">Introdu link-ul articolului</label>
+                                <input id="linkInput" class="form-control custom-input" type="url" placeholder="https://..." />
+                            </div>
+                            <button class="btn btn-primary w-100 py-3 fw-bold rounded-3 action-btn" id="genLinkBtn" onclick="generatePosts('/api/generate-from-link', 'linkInput')">
+                                Extrage & Generează
+                            </button>
+                        </div>
+
+                        <div id="tab-audio" class="tab-content text-center py-4" style="display: none;">
+                            <i class="bi bi-mic text-secondary" style="font-size: 3rem;"></i>
+                            <p class="text-secondary mt-2 mb-4">Apasă pe buton și dictează ideea ta (max 1 minut).</p>
+                            <button id="recordBtn" class="btn btn-danger py-3 px-5 fw-bold rounded-pill shadow action-btn">
+                                <i class="bi bi-record-circle me-2"></i> Start Înregistrare
+                            </button>
+                        </div>
+
+                        <div id="loader" class="text-center py-4" style="display: none;">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <h5 class="text-secondary">AI-ul lucrează...</h5>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="mt-5" style="display: none;">
+            <h3 class="text-center mb-4 fw-bold">Rezultatele Tale</h3>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6">
+                    <div class="card result-card card-linkedin border-0 h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 pb-0 d-flex align-items-center">
+                            <i class="bi bi-linkedin text-primary fs-4 me-2"></i> <h5 class="mb-0 fw-bold">LinkedIn</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="result-text" id="resLinkedin"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card result-card card-twitter border-0 h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 pb-0 d-flex align-items-center">
+                            <i class="bi bi-twitter-x text-light fs-4 me-2"></i> <h5 class="mb-0 fw-bold">Twitter</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="result-text" id="resTwitter"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card result-card card-facebook border-0 h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 pb-0 d-flex align-items-center">
+                            <i class="bi bi-facebook text-info fs-4 me-2"></i> <h5 class="mb-0 fw-bold">Facebook</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="result-text" id="resFacebook"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="publishSection" class="text-center mt-5">
+                <button id="publishBtn" class="btn btn-success py-3 px-5 fw-bold rounded-pill shadow-lg action-btn" onclick="publishToSocials()">
+                    <i class="bi bi-rocket-takeoff me-2"></i> Publică acum pe toate rețelele
+                </button>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-5 fade-in delay-2">
+            <div class="col-lg-10">
+                <div class="card app-card border-0">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-clock-history me-2"></i>Istoric Postări</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0 custom-table">
+                                <thead>
+                                    <tr class="text-secondary">
+                                        <th>ID</th>
+                                        <th>Data</th>
+                                        <th>Sursă</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="tab-text" class="tab-content active">
-        <textarea id="masterPost" placeholder="Ex: Tocmai am lansat un nou proiect despre AI..."></textarea>
-        <button class="action-btn" id="genTextBtn" onclick="generatePosts('/api/generate-posts', 'masterPost')">Generează din Text</button>
-    </div>
+    <footer class="app-footer py-4 mt-5 border-top border-secondary border-opacity-10">
+        <div class="container text-center">
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-2 team-list">
+                <span class="team-member">Pitici Silviu</span>
+                <span class="footer-separator">•</span>
+                <span class="team-member">Pinko Samuel</span>
+                <span class="footer-separator">•</span>
+                <span class="team-member">Putineanu Alex</span>
+                <span class="footer-separator">•</span>
+                <span class="team-member">Slavu Tudor</span>
+                <span class="footer-separator">•</span>
+                <span class="team-member">Panfiloiu Luigi</span>
+            </div>
+            <p class="text-muted small mb-0">&copy; 2026 AI Social Cross-Poster. Toate drepturile rezervate.</p>
+        </div>
+    </footer>
 
-    <div id="tab-link" class="tab-content">
-        <input type="text" id="linkInput" placeholder="Lipește un link aici (ex: https://blog.com/articol-interesant)">
-        <button class="action-btn" id="genLinkBtn" onclick="generatePosts('/api/generate-from-link', 'linkInput')">Rezuma și Generează</button>
-    </div>
-
-    <div id="tab-audio" class="tab-content" style="text-align: center;">
-        <p style="color: #555;">Apasă pe buton, spune ideea ta (maxim 1 minut), apoi apasă din nou pentru a opri.</p>
-        <button id="recordBtn" class="action-btn" style="width: auto; padding: 15px 40px; margin: 0 auto; border-radius: 50px;">🎙️ Start Înregistrare</button>
-    </div>
-
-    <div id="loader" class="loader">Se procesează magia... Te rugăm să aștepți! ⏳</div>
-
-    <div class="results-grid" id="resultsContainer" style="display: none;">
-        <div class="result-card"><h3>💼 LinkedIn</h3><div class="result-text" id="resLinkedin"></div></div>
-        <div class="result-card"><h3>🐦 Twitter (X)</h3><div class="result-text" id="resTwitter"></div></div>
-        <div class="result-card"><h3>👥 Facebook</h3><div class="result-text" id="resFacebook"></div></div>
-    </div>
-
-    <div id="publishSection" style="display: none; margin-top: 20px;">
-        <button id="publishBtn" onclick="publishToSocials()" style="background-color: #28a745; width: 100%; padding: 15px; font-size: 18px; color: white; border: none; border-radius: 8px; cursor: pointer;">🚀 Publică acum pe toate rețelele</button>
-    </div>
-
-    <hr style="margin: 40px 0; border: 0; border-top: 1px solid #ddd;">
-    <h2>📊 Istoric Postări</h2>
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; background: #fafafa; border: 1px solid #ddd;">
-            <thead style="background-color: #333; color: white;">
-                <tr><th style="padding: 10px;">ID</th><th>Data</th><th>Sursă</th><th>Status</th></tr>
-            </thead>
-            <tbody id="logsBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    // --- GESTIUNE TAB-URI ---
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-    }
-
-    // --- LOGICĂ GENERARE TEXT / LINK ---
-    async function generatePosts(endpoint, inputId) {
-        const inputData = document.getElementById(inputId).value;
-        if (!inputData.trim()) { alert('Te rog să introduci datele!'); return; }
-
-        prepaireUIForGeneration();
-
-        try {
-            const response = await fetch(`http://localhost:8000${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ master_post: inputData })
-            });
-            handleResponse(await response.json());
-        } catch (error) {
-            alert('Eroare de conexiune cu serverul.');
+    <script>
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            btnElement.classList.add('active');
         }
-    }
 
-    // --- LOGICĂ ÎNREGISTRARE AUDIO ---
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
-    const recordBtn = document.getElementById('recordBtn');
+        async function generatePosts(endpoint, inputId) {
+            const inputData = document.getElementById(inputId).value;
+            if (!inputData.trim()) { alert('Te rog să introduci datele!'); return; }
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
 
-    recordBtn.addEventListener('click', async () => {
-        if (!isRecording) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
-                mediaRecorder.onstop = async () => {
-                    prepaireUIForGeneration();
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    audioChunks = [];
-
-                    const formData = new FormData();
-                    formData.append('audio_file', audioBlob, 'voce.webm');
-
-                    try {
-                        const response = await fetch('http://localhost:8000/api/generate-from-audio', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        handleResponse(await response.json());
-                    } catch (err) {
-                        alert("Eroare la procesarea vocii pe server.");
-                        document.getElementById('loader').style.display = 'none';
-                    }
-                };
-
-                mediaRecorder.start();
-                isRecording = true;
-                recordBtn.innerText = "⏹️ Oprește & Generează";
-                recordBtn.classList.add('recording');
-            } catch (err) { alert("Permite accesul la microfon!"); }
-        } else {
-            mediaRecorder.stop();
-            isRecording = false;
-            recordBtn.innerText = "🎙️ Start Înregistrare";
-            recordBtn.classList.remove('recording');
+                const response = await fetch(`http://localhost:8000${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ master_post: inputData })
+                });
+                handleResponse(await response.json());
+            } catch (error) {
+                alert('Eroare de conexiune cu serverul.');
+                document.getElementById('loader').style.display = 'none';
+            }
         }
-    });
 
-    // --- FUNCȚII UTILITARE UI ---
-    function prepaireUIForGeneration() {
-        document.getElementById('loader').style.display = 'block';
-        document.getElementById('resultsContainer').style.display = 'none';
-        document.getElementById('publishSection').style.display = 'none';
-    }
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        const recordBtn = document.getElementById('recordBtn');
 
-    function handleResponse(data) {
-        document.getElementById('loader').style.display = 'none';
-        if (data.status === "success") {
-            document.getElementById('resLinkedin').textContent = data.results.linkedin;
-            document.getElementById('resTwitter').textContent = data.results.twitter;
-            document.getElementById('resFacebook').textContent = data.results.facebook;
-            document.getElementById('resultsContainer').style.display = 'grid';
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        document.getElementById('loader').style.display = 'block';
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        audioChunks = [];
+                        const formData = new FormData();
+                        formData.append('audio_file', audioBlob, 'voce.webm');
+                        try {
+                            const response = await fetch('http://localhost:8000/api/generate-from-audio', {
+                                method: 'POST', body: formData
+                            });
+                            handleResponse(await response.json());
+                        } catch (err) {
+                            alert('Eroare la procesarea vocii pe server.');
+                            document.getElementById('loader').style.display = 'none';
+                        }
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.innerHTML = '<i class="bi bi-stop-circle me-2"></i> Oprește & Generează';
+                    recordBtn.classList.replace('btn-danger', 'btn-warning');
+                } catch (err) {
+                    alert('Permite accesul la microfon!');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordBtn.innerHTML = '<i class="bi bi-record-circle me-2"></i> Start Înregistrare';
+                recordBtn.classList.replace('btn-warning', 'btn-danger');
+            }
+        });
 
-            const publishBtn = document.getElementById('publishBtn');
-            publishBtn.disabled = false;
-            publishBtn.textContent = "🚀 Publică acum pe toate rețelele";
-            publishBtn.style.backgroundColor = "#28a745";
-            document.getElementById('publishSection').style.display = 'block';
-            fetchLogs();
-        } else {
-            alert('A apărut o eroare: ' + data.message);
+        function handleResponse(data) {
+            document.getElementById('loader').style.display = 'none';
+            if (data.status === 'success') {
+                document.getElementById('resLinkedin').textContent = data.results.linkedin;
+                document.getElementById('resTwitter').textContent = data.results.twitter;
+                document.getElementById('resFacebook').textContent = data.results.facebook;
+                
+                // Folosește funcția nativă din animations.js pentru apariție fluidă
+                if (typeof window.showResultsAnimated === 'function') {
+                    window.showResultsAnimated();
+                } else {
+                    document.getElementById('resultsContainer').style.display = 'block';
+                }
+                
+                fetchLogs();
+            } else {
+                alert('A apărut o eroare: ' + (data.message || 'Verifică backend-ul.'));
+            }
         }
-    }
 
-    // --- PUBLICARE N8N ---
-    async function publishToSocials() {
-        const btn = document.getElementById('publishBtn');
-        btn.disabled = true; btn.textContent = "Se trimite...";
+        async function publishToSocials() {
+            const btn = document.getElementById('publishBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Se trimite...';
+            const payload = {
+                linkedin_text: document.getElementById('resLinkedin').textContent,
+                twitter_text: document.getElementById('resTwitter').textContent,
+                facebook_text: document.getElementById('resFacebook').textContent
+            };
+            try {
+                const response = await fetch('http://localhost:8000/api/publish', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i> Trimis cu succes';
+                } else {
+                    alert('Eroare n8n: ' + (data.message || 'Răspuns invalid.'));
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i> Publică acum';
+                }
+            } catch (error) {
+                alert('Eroare rețea.');
+                btn.disabled = false;
+            }
+        }
 
-        const payload = {
-            linkedin_text: document.getElementById('resLinkedin').textContent,
-            twitter_text: document.getElementById('resTwitter').textContent,
-            facebook_text: document.getElementById('resFacebook').textContent
-        };
+        async function fetchLogs() {
+            const tbody = document.getElementById('logsBody');
+            try {
+                const response = await fetch('http://localhost:8000/api/logs');
+                const data = await response.json();
+                tbody.innerHTML = data.logs.map(log => `
+                    <tr>
+                        <td class="text-secondary fw-semibold">#${log.id}</td>
+                        <td class="text-light">${log.timestamp}</td>
+                        <td class="text-truncate text-light" style="max-width: 250px;">${log.master_post}</td>
+                        <td><span class="status-badge">${log.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Eroare preluare loguri:', error);
+            }
+        }
 
-        try {
-            const response = await fetch('http://localhost:8000/api/publish', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            });
-            const data = await response.json();
-            if (data.status === "success") {
-                btn.textContent = "✅ Trimis cu succes"; btn.style.backgroundColor = "#6c757d";
-            } else { alert("Eroare n8n: " + data.message); btn.disabled = false; }
-        } catch (error) { alert('Eroare rețea.'); btn.disabled = false; }
-    }
-
-    // --- LOGURI ---
-    async function fetchLogs() {
-        const tbody = document.getElementById('logsBody');
-        try {
-            const response = await fetch('http://localhost:8000/api/logs');
-            const data = await response.json();
-            tbody.innerHTML = data.logs.map(log => `<tr><td style="padding:10px;">#${log.id}</td><td>${log.timestamp}</td><td>${log.master_post}</td><td>${log.status}</td></tr>`).join('');
-        } catch (error) { console.error("Eroare la preluarea logurilor", error); }
-    }
-
-    window.onload = fetchLogs;
-</script>
+        window.addEventListener('DOMContentLoaded', fetchLogs);
+    </script>
+    <script src="animations.js"></script>
 </body>
 </html>
